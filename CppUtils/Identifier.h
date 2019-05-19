@@ -1,16 +1,26 @@
 #pragma once
 
+#define DEFINE_IDENTIFIER(IdentifierName, IdentifierType) \
+class IdentifierName ## Trait {}; \
+using IdentifierName = utils::Identifier<IdentifierName ## Trait, IdentifierType>; \
+
 namespace utils
 {
-
-template<typename TraitT, typename ValueT>
+template<	typename TraitT, 
+			typename ValueT, 
+			typename = std::enable_if<
+				std::is_pointer<ValueT>::value	 == false &&
+				std::is_reference<ValueT>::value == false &&
+				std::is_void<ValueT>::value		 == false
+			>::type
+>
 class Identifier final
 {
 public:
 	explicit Identifier<TraitT, ValueT>(ValueT&& i_value) : m_value(std::forward<ValueT>(i_value)) { }
 	
 	// copy semantics
-	explicit Identifier<TraitT, ValueT>(const Identifier<TraitT, ValueT>& rhs) 
+	Identifier<TraitT, ValueT>(const Identifier<TraitT, ValueT>& rhs) 
 		: m_value(rhs.m_value) { }
 
 	Identifier<TraitT, ValueT>& operator=(const Identifier<TraitT, ValueT>& rhs) &

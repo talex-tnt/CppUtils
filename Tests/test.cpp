@@ -1,20 +1,18 @@
 #include "pch.h"
 #include "../CppUtils/Identifier.h"
 
-class CarTrait{};
-using CarId = utils::Identifier<CarTrait, std::string>;
-
+DEFINE_IDENTIFIER(CarId, std::string);
 
 TEST(TestEqualityOperator, TestName)
 {
-	CarId car1("MyCar");
-	CarId car2("MyCar");
+	const CarId car1("MyCar");
+	const CarId car2("MyCar");
 	EXPECT_TRUE(car1 == car2);
 }
 
 TEST(TestInEqualityOperator, TestName)
 {
-	CarId car1("MyCar1");
-	CarId car2("MyCar2");
+	const CarId car1("MyCar1");
+	const CarId car2("MyCar2");
 	EXPECT_TRUE(car1 != car2);
 }
