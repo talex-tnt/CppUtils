@@ -7,7 +7,7 @@ template<typename TraitT, typename ValueT>
 class Identifier final
 {
 public:
-	explicit Identifier<TraitT, ValueT>(ValueT&& i_value) : m_value(std::forward(i_value)) { }
+	explicit Identifier<TraitT, ValueT>(ValueT&& i_value) : m_value(std::forward<ValueT>(i_value)) { }
 	
 	// copy semantics
 	explicit Identifier<TraitT, ValueT>(const Identifier<TraitT, ValueT>& rhs) 
@@ -21,7 +21,6 @@ public:
 		}
 		return *this;
 	}
-	Identifier<TraitT, ValueT>& operator=(const Identifier<TraitT, ValueT>& rhs) && = delete;
 
 	explicit Identifier<TraitT, ValueT>( Identifier<TraitT, ValueT>&& rhs)
 		: m_value(std::move(rhs.m_value))
@@ -36,9 +35,8 @@ public:
 		}
 		return *this;
 	}
-	Identifier<TraitT, ValueT>& operator=(Identifier<TraitT, ValueT>&& rhs) && = delete;
 
-	~Identifier<TraitT, ValueT>(ValueT&& i_value) = default;
+	~Identifier<TraitT, ValueT>() = default;
 
 	const ValueT& GetValue() const { return m_value; }
 
@@ -47,13 +45,13 @@ private:
 };
 
 template<typename TraitT, typename ValueT>
-bool operator==(Identifier<TraitT, ValueT> lhs, Identifier<TraitT, ValueT> rhs)
+inline bool operator==(const Identifier<TraitT, ValueT>& lhs, const Identifier<TraitT, ValueT>& rhs)
 {
 	return lhs.GetValue() == rhs.GetValue();
 }
 
 template<typename TraitT, typename ValueT>
-bool operator!=(Identifier<TraitT, ValueT> lhs, Identifier<TraitT, ValueT> rhs)
+inline bool operator!=(const Identifier<TraitT, ValueT>& lhs, const Identifier<TraitT, ValueT>& rhs)
 {
 	return !( lhs == rhs );
 }
