@@ -8,7 +8,7 @@ struct IdentifierName : public utils::Identifier<IdentifierName ## Trait, Identi
 using BaseT = utils::Identifier<IdentifierName ## Trait, IdentifierType>; \
 template<class ValueT> \
 IdentifierName(ValueT&& i_value) : BaseT(std::forward<ValueT>(i_value)) { } \
-}; \
+}; 
 
 namespace utils
 {
