@@ -51,3 +51,11 @@ TEST(TestGetValueLValueRef, IdentifierTest)
 	const CarId car1("MyCar");
 	EXPECT_EQ(car1.GetValue(), "MyCar");
 }
+
+
+TEST(TestGetValueRValueRef, IdentifierTest)
+{
+	const std::string c1("MyCar");
+	const std::string& c2 = CarId("MyCar").GetValue();
+	EXPECT_EQ(c1, c2);
+}

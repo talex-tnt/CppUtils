@@ -25,7 +25,7 @@ Identifier<TraitT, ValueT>::Identifier(Identifier<TraitT, ValueT>&& rhs)
 }
 
 template<typename TraitT, typename ValueT>
-Identifier<TraitT, ValueT>& utils::Identifier<TraitT, ValueT>::operator=(const Identifier<TraitT, ValueT>& rhs) &
+Identifier<TraitT, ValueT>& Identifier<TraitT, ValueT>::operator=(const Identifier<TraitT, ValueT>& rhs) &
 {
 	if ( this != &rhs )
 	{
@@ -35,7 +35,7 @@ Identifier<TraitT, ValueT>& utils::Identifier<TraitT, ValueT>::operator=(const I
 }
 
 template<typename TraitT, typename ValueT>
-Identifier<TraitT, ValueT>& utils::Identifier<TraitT, ValueT>::operator=(Identifier<TraitT, ValueT>&& rhs) &
+Identifier<TraitT, ValueT>& Identifier<TraitT, ValueT>::operator=(Identifier<TraitT, ValueT>&& rhs) &
 {
 	if ( this != &rhs )
 	{
@@ -45,9 +45,15 @@ Identifier<TraitT, ValueT>& utils::Identifier<TraitT, ValueT>::operator=(Identif
 }
 
 template<typename TraitT, typename ValueT>
-const ValueT& utils::Identifier<TraitT, ValueT>::GetValue() const&
+const ValueT& Identifier<TraitT, ValueT>::GetValue() const&
 {
 	return m_value;
+}
+
+template<typename TraitT, typename ValueT>
+ValueT Identifier<TraitT, ValueT>::GetValue() const&&
+{
+	return std::move(m_value);
 }
 
 // Comparison Operators follows:
