@@ -3,15 +3,20 @@
 
 #define DEFINE_IDENTIFIER(IdentifierName, IdentifierType) \
 class IdentifierName ## Trait {}; \
-using IdentifierName = utils::Identifier<IdentifierName ## Trait, IdentifierType>; \
+struct IdentifierName : public utils::Identifier<IdentifierName ## Trait, IdentifierType> \
+{ \
+using BaseT = utils::Identifier<IdentifierName ## Trait, IdentifierType>; \
+template<class ValueT> \
+IdentifierName(ValueT&& i_value) : BaseT(std::forward<ValueT>(i_value)) { } \
+}; \
 
 namespace utils
 {
 
 template<typename TraitT, typename ValueT>
-class Identifier final
+class Identifier
 {
-	static_assert( 
+	static_assert(
 		!std::is_reference<ValueT>::value,
 		"ValueT cannot be a reference" );
 	static_assert(
@@ -22,23 +27,25 @@ class Identifier final
 		"ValueT cannot be void" );
 
 public:
-	explicit Identifier(ValueT&& i_value) 
-		: m_value(std::forward<ValueT>(i_value)) { }
-	
+	explicit Identifier(ValueT&& i_value)
+		: m_value(std::forward<ValueT>(i_value))
+	{ }
+
 	// copy semantics
-	Identifier(const Identifier<TraitT, ValueT>& rhs) 
-		: m_value(rhs.m_value) { }
+	Identifier(const Identifier<TraitT, ValueT>& rhs)
+		: m_value(rhs.m_value)
+	{ }
 
 	Identifier<TraitT, ValueT>& operator=(const Identifier<TraitT, ValueT>& rhs) &
 	{
-		if (this != &rhs)
+		if ( this != &rhs )
 		{
 			m_value = rhs.m_value;
 		}
 		return *this;
 	}
 
-	explicit Identifier( Identifier<TraitT, ValueT>&& rhs)
+	explicit Identifier(Identifier<TraitT, ValueT>&& rhs)
 		: m_value(std::move(rhs.m_value))
 	{ }
 
@@ -52,14 +59,18 @@ public:
 		return *this;
 	}
 
-	~Identifier() = default;
-
 	const ValueT& GetValue() const { return m_value; }
+
+protected:	// This class is meant NOT to be deleted polymorphically
+	~Identifier() = default;
 
 private:
 	const ValueT m_value;
 };
+} //namespace utils
 
+namespace utils
+{
 template<typename TraitT, typename ValueT>
 inline bool operator==(const Identifier<TraitT, ValueT>& lhs, const Identifier<TraitT, ValueT>& rhs)
 {
@@ -72,4 +83,4 @@ inline bool operator!=(const Identifier<TraitT, ValueT>& lhs, const Identifier<T
 	return !( lhs == rhs );
 }
 
-}
+} //namespace utils
