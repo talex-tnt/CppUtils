@@ -45,3 +45,9 @@ TEST(TestCopyAssignementOperatorWithNonConstArg, IdentifierTest)
 	const CarId car2 = car1;
 	EXPECT_TRUE(car1 == car2);
 }
+
+TEST(TestGetValueLValueRef, IdentifierTest)
+{
+	const CarId car1("MyCar");
+	EXPECT_EQ(car1.GetValue(), "MyCar");
+}

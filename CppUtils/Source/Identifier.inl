@@ -45,11 +45,10 @@ Identifier<TraitT, ValueT>& utils::Identifier<TraitT, ValueT>::operator=(Identif
 }
 
 template<typename TraitT, typename ValueT>
-const ValueT& utils::Identifier<TraitT, ValueT>::GetValue() const
+const ValueT& utils::Identifier<TraitT, ValueT>::GetValue() const&
 {
 	return m_value;
 }
-
 
 // Comparison Operators follows:
 

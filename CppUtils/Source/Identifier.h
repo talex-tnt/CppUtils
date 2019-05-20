@@ -26,7 +26,7 @@ public:
 	explicit Identifier(Identifier<TraitT, ValueT>&& rhs);
 	Identifier<TraitT, ValueT>& operator=(Identifier<TraitT, ValueT>&& rhs)&;
 
-	const ValueT& GetValue() const;
+	const ValueT& GetValue() const&;
 
 protected:	// This class is meant NOT to be deleted polymorphically
 	~Identifier() = default;
