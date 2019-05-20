@@ -21,7 +21,7 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Identifier.h">
+    <ClInclude Include="Source\Identifier.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -31,7 +31,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Identifier.inl">
+    <None Include="Source\Identifier.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
