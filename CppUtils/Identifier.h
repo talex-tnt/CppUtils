@@ -46,3 +46,4 @@ private:
 };
 } //namespace utils
 
+#include "Identifier.inl"

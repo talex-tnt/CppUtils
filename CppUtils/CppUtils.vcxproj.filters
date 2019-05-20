@@ -31,7 +31,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Identifier-inl.h">
+    <None Include="Identifier.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
