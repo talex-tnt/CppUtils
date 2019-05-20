@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "../CppUtils/Identifier.h"
+#include "../CppUtils/Identifier-inl.h"
 
 DEFINE_IDENTIFIER(CarId, std::string);
 
