@@ -33,7 +33,7 @@ protected:	// This class is meant NOT to be deleted polymorphically
 	~Identifier() = default;
 
 private:
-	const ValueT m_value;
+	/*const*/ ValueT m_value;
 
 	static_assert(
 		!std::is_reference<ValueT>::value,
