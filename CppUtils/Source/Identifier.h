@@ -6,9 +6,7 @@ class IdentifierName ## Trait {}; \
 struct IdentifierName : public utils::Identifier<IdentifierName ## Trait, IdentifierType> \
 { \
 	using BaseT = utils::Identifier<IdentifierName ## Trait, IdentifierType>; \
-	usint BaseT::BaseT;
-	IdentifierName(const IdentifierType& i_value) : BaseT(i_value) { } \
-	IdentifierName(IdentifierType&& i_value) : BaseT(std::move(i_value)) { } \
+	using BaseT::BaseT; \
 }; 
 
 #define DEFINE_IDENTIFIER_WITH_INVALID_VALUE(IdentifierName, IdentifierType, InvalidValue) \
@@ -16,13 +14,11 @@ class IdentifierName ## Trait {}; \
 struct IdentifierName : public utils::InvalidableIdentifier<IdentifierName ## Trait, IdentifierType> \
 { \
 	using BaseT = utils::InvalidableIdentifier<IdentifierName ## Trait, IdentifierType>; \
-	IdentifierName(const IdentifierType& i_value) : BaseT(i_value) { } \
-	IdentifierName(IdentifierType&& i_value) : BaseT(std::move(i_value)) { } \
-	IdentifierName() : BaseT() { } \
+	using BaseT::BaseT; \
 }; \
 template<> \
-const typename utils::InvalidableIdentifier<IdentifierName ## Trait, IdentifierType>::ValueType \
-utils::InvalidableIdentifier<IdentifierName ## Trait, IdentifierType>::k_invalidValue = InvalidValue; 
+const typename IdentifierName::ValueType \
+IdentifierName::k_invalidValue = InvalidValue; 
 
 namespace utils
 {
