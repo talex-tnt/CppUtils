@@ -5,19 +5,33 @@
 class IdentifierName ## Trait {}; \
 struct IdentifierName : public utils::Identifier<IdentifierName ## Trait, IdentifierType> \
 { \
-using BaseT = utils::Identifier<IdentifierName ## Trait, IdentifierType>; \
-template<class ValueT> \
-IdentifierName(ValueT&& i_value) : BaseT(std::forward<ValueT>(i_value)) { } \
+	using BaseT = utils::Identifier<IdentifierName ## Trait, IdentifierType>; \
+	usint BaseT::BaseT;
+	IdentifierName(const IdentifierType& i_value) : BaseT(i_value) { } \
+	IdentifierName(IdentifierType&& i_value) : BaseT(std::move(i_value)) { } \
 }; 
+
+#define DEFINE_IDENTIFIER_WITH_INVALID_VALUE(IdentifierName, IdentifierType, InvalidValue) \
+class IdentifierName ## Trait {}; \
+struct IdentifierName : public utils::InvalidableIdentifier<IdentifierName ## Trait, IdentifierType> \
+{ \
+	using BaseT = utils::InvalidableIdentifier<IdentifierName ## Trait, IdentifierType>; \
+	IdentifierName(const IdentifierType& i_value) : BaseT(i_value) { } \
+	IdentifierName(IdentifierType&& i_value) : BaseT(std::move(i_value)) { } \
+	IdentifierName() : BaseT() { } \
+}; \
+template<> \
+const typename utils::InvalidableIdentifier<IdentifierName ## Trait, IdentifierType>::ValueType \
+utils::InvalidableIdentifier<IdentifierName ## Trait, IdentifierType>::k_invalidValue = InvalidValue; 
 
 namespace utils
 {
-
 template<typename TraitT, typename ValueT>
 class Identifier
 {
 public:
 	explicit Identifier(ValueT&& i_value);
+	explicit Identifier(const ValueT& i_value);
 
 	Identifier(const Identifier<TraitT, ValueT>& rhs);
 	Identifier<TraitT, ValueT>& operator=(const Identifier<TraitT, ValueT>& rhs)&;
@@ -45,6 +59,20 @@ private:
 		!std::is_void<ValueT>::value,
 		"ValueT cannot be void" );
 };
+
+
+template<typename TraitT, typename ValueT>
+class InvalidableIdentifier : public Identifier<TraitT, ValueT>
+{
+public:
+	using ValueType = ValueT;
+	InvalidableIdentifier();
+	explicit InvalidableIdentifier(ValueT&& i_value);
+	explicit InvalidableIdentifier(const ValueT& i_value);
+	bool IsValid() const;
+	static const ValueT k_invalidValue;
+};
+
 } //namespace utils
 
 #include "Identifier.inl"

@@ -2,23 +2,29 @@
 
 namespace utils
 {
-
 template<typename TraitT, typename ValueT>
-Identifier<TraitT, ValueT>::Identifier(ValueT&& i_value) 
-	: m_value(std::forward<ValueT>(i_value))
+Identifier<TraitT, ValueT>::Identifier(ValueT&& i_value)
+	: m_value(std::move(i_value))
 {
 	// Nothing to do
 }
 
 template<typename TraitT, typename ValueT>
-Identifier<TraitT, ValueT>::Identifier(const Identifier<TraitT, ValueT>& rhs) 
+Identifier<TraitT, ValueT>::Identifier(const ValueT& i_value)
+	: m_value(i_value)
+{
+	// Nothing to do
+}
+
+template<typename TraitT, typename ValueT>
+Identifier<TraitT, ValueT>::Identifier(const Identifier<TraitT, ValueT>& rhs)
 	: m_value(rhs.m_value)
 {
 	// Nothing to do
 }
 
 template<typename TraitT, typename ValueT>
-Identifier<TraitT, ValueT>::Identifier(Identifier<TraitT, ValueT>&& rhs) 
+Identifier<TraitT, ValueT>::Identifier(Identifier<TraitT, ValueT>&& rhs)
 	: m_value(std::move(rhs.m_value))
 {
 	// Nothing to do
@@ -69,5 +75,34 @@ inline bool operator!=(const Identifier<TraitT, ValueT>& lhs, const Identifier<T
 {
 	return !( lhs == rhs );
 }
+
+
+template<typename TraitT, typename ValueT>
+InvalidableIdentifier<TraitT, ValueT>::InvalidableIdentifier()
+	: Identifier(k_invalidValue)
+{
+	// Nothing to do
+}
+
+template<typename TraitT, typename ValueT>
+InvalidableIdentifier<TraitT, ValueT>::InvalidableIdentifier(ValueT&& i_value)
+	: Identifier(std::move(i_value))
+{
+	// Nothing to do
+}
+
+template<typename TraitT, typename ValueT>
+InvalidableIdentifier<TraitT, ValueT>::InvalidableIdentifier(const ValueT& i_value)
+	: Identifier(i_value)
+{
+	// Nothing to do
+}
+
+template<typename TraitT, typename ValueT>
+bool InvalidableIdentifier<TraitT, ValueT>::IsValid() const
+{
+	return GetValue() != k_invalidValue;
+}
+
 
 } //namespace utils
