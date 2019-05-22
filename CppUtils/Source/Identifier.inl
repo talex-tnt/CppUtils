@@ -104,5 +104,4 @@ bool InvalidableIdentifier<TraitT, ValueT>::IsValid() const
 	return GetValue() != k_invalidValue;
 }
 
-
 } //namespace utils
