@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "../CppUtils/Source/Identifier.h"
+#include "../CppUtils/Source/IdentifierStream.h"
+#include <iosfwd>
 
 DEFINE_IDENTIFIER(StringId, std::string);
 DEFINE_IDENTIFIER(IntId, std::int32_t);
@@ -18,6 +20,7 @@ struct StringIdentifierFixtureBase
 	IdType m_id = IdType("Mike");
 	IdType m_id2 = IdType("Derek");
 	IdType GetId() const { return IdType("Jordan"); }
+	std::string ToString(const IdType& i_type) const { return i_type.GetValue(); }
 };
 
 template <typename IdType>
@@ -28,6 +31,7 @@ struct IntIdentifierFixtureBase
 	IdType m_id = IdType(2);
 	IdType m_id2 = IdType(3);
 	IdType GetId() const { return IdType(4); }
+	std::string ToString(const IdType& i_type) const { return std::to_string(i_type.GetValue()); }
 };
 
 template <typename T>
@@ -151,5 +155,13 @@ TYPED_TEST(InvalidableIdentifierFixture, TestExpectValidValue)
 	const TypeParam myId = GetId();
 	EXPECT_TRUE(myId.IsValid());
 }
+
+TYPED_TEST(IdentifierFixture, TestOutputStream)
+{
+	std::ostringstream os;
+	os << m_id;
+	EXPECT_EQ(os.str(), ToString(m_id));
+}
+
 }
 
