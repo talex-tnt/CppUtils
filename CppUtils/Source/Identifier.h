@@ -1,5 +1,4 @@
 #pragma once
-#include <type_traits>
 #include <iosfwd>
 
 #define DEFINE_IDENTIFIER(IdentifierName, IdentifierType) \
