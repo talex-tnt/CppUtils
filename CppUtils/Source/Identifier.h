@@ -3,18 +3,18 @@
 #include <iosfwd>
 
 #define DEFINE_IDENTIFIER(IdentifierName, IdentifierType) \
-class IdentifierName ## Trait {}; \
-struct IdentifierName : public utils::Identifier<IdentifierName ## Trait, IdentifierType> \
+class IdentifierName ## Traits {}; \
+struct IdentifierName : public utils::Identifier<IdentifierName ## Traits, IdentifierType> \
 { \
-	using BaseT = utils::Identifier<IdentifierName ## Trait, IdentifierType>; \
+	using BaseT = utils::Identifier<IdentifierName ## Traits, IdentifierType>; \
 	using BaseT::BaseT; \
 }; 
 
 #define DEFINE_IDENTIFIER_WITH_INVALID_VALUE(IdentifierName, IdentifierType, InvalidValue) \
-class IdentifierName ## Trait {}; \
-struct IdentifierName : public utils::InvalidableIdentifier<IdentifierName ## Trait, IdentifierType> \
+class IdentifierName ## Traits {}; \
+struct IdentifierName : public utils::InvalidableIdentifier<IdentifierName ## Traits, IdentifierType> \
 { \
-	using BaseT = utils::InvalidableIdentifier<IdentifierName ## Trait, IdentifierType>; \
+	using BaseT = utils::InvalidableIdentifier<IdentifierName ## Traits, IdentifierType>; \
 	using BaseT::BaseT; \
 }; \
 template<> \
@@ -23,28 +23,28 @@ IdentifierName::BaseT::k_invalidValue = InvalidValue;
 
 namespace utils
 {
-template<typename TraitT, typename ValueT>
+template<typename Traits, typename ValueT>
 class Identifier
 {
 public:
 	explicit Identifier(ValueT&& i_value);
 	explicit Identifier(const ValueT& i_value);
 
-	Identifier(const Identifier<TraitT, ValueT>& rhs);
-	Identifier<TraitT, ValueT>& operator=(const Identifier<TraitT, ValueT>& rhs)&;
+	Identifier(const Identifier<Traits, ValueT>& rhs);
+	Identifier<Traits, ValueT>& operator=(const Identifier<Traits, ValueT>& rhs)&;
 
 	//move semantics
-	explicit Identifier(Identifier<TraitT, ValueT>&& rhs);
-	Identifier<TraitT, ValueT>& operator=(Identifier<TraitT, ValueT>&& rhs)&;
+	explicit Identifier(Identifier<Traits, ValueT>&& rhs);
+	Identifier<Traits, ValueT>& operator=(Identifier<Traits, ValueT>&& rhs)&;
 
 	const ValueT& GetValue() const&;
 	ValueT GetValue() const&&;
 
-	template<typename TraitT, typename ValueT>
-	friend std::ostream& operator<<(std::ostream& o_stream, const Identifier<TraitT, ValueT>& i_identifier);
+	template<typename Traits, typename ValueT>
+	friend std::ostream& operator<<(std::ostream& o_stream, const Identifier<Traits, ValueT>& i_identifier);
 
-	template<typename TraitT, typename ValueT>
-	friend std::istream& operator>>(std::istream& i_stream, Identifier<TraitT, ValueT>& i_identifier);
+	template<typename Traits, typename ValueT>
+	friend std::istream& operator>>(std::istream& i_stream, Identifier<Traits, ValueT>& i_identifier);
 
 	using ValueType = ValueT;
 protected:	// This class is meant NOT to be deleted polymorphically
@@ -65,8 +65,8 @@ private:
 };
 
 
-template<typename TraitT, typename ValueT>
-class InvalidableIdentifier : public Identifier<TraitT, ValueT>
+template<typename Traits, typename ValueT>
+class InvalidableIdentifier : public Identifier<Traits, ValueT>
 {
 public:
 	using ValueType = ValueT;
