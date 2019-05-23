@@ -1,11 +1,8 @@
 #include "pch.h"
 #include "../CppUtils/Source/Identifier.h"
-#include "../CppUtils/Source/IdentifierStream.h"
-#include <iosfwd>
 
 DEFINE_IDENTIFIER(StringId, std::string);
 DEFINE_IDENTIFIER(IntId, std::int32_t);
-
 DEFINE_IDENTIFIER_WITH_INVALID_VALUE(InvStringId, std::string, "Null");
 DEFINE_IDENTIFIER_WITH_INVALID_VALUE(InvIntId, std::int32_t, -1);
 
@@ -161,6 +158,13 @@ TYPED_TEST(IdentifierFixture, TestOutputStream)
 	std::ostringstream os;
 	os << m_id;
 	EXPECT_EQ(os.str(), ToString(m_id));
+}
+
+TYPED_TEST(IdentifierFixture, TestInputStream)
+{
+	std::istringstream is(ToString(GetId()));
+	is >> m_id;
+	EXPECT_EQ(GetId(), m_id);
 }
 
 }

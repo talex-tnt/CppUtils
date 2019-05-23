@@ -1,5 +1,6 @@
 #pragma once
 #include <type_traits>
+#include <iosfwd>
 
 #define DEFINE_IDENTIFIER(IdentifierName, IdentifierType) \
 class IdentifierName ## Trait {}; \
@@ -18,7 +19,7 @@ struct IdentifierName : public utils::InvalidableIdentifier<IdentifierName ## Tr
 }; \
 template<> \
 const typename IdentifierName::ValueType \
-IdentifierName::k_invalidValue = InvalidValue; 
+IdentifierName::BaseT::k_invalidValue = InvalidValue; 
 
 namespace utils
 {
@@ -39,6 +40,13 @@ public:
 	const ValueT& GetValue() const&;
 	ValueT GetValue() const&&;
 
+	template<typename TraitT, typename ValueT>
+	friend std::ostream& operator<<(std::ostream& o_stream, const Identifier<TraitT, ValueT>& i_identifier);
+
+	template<typename TraitT, typename ValueT>
+	friend std::istream& operator>>(std::istream& i_stream, Identifier<TraitT, ValueT>& i_identifier);
+
+	using ValueType = ValueT;
 protected:	// This class is meant NOT to be deleted polymorphically
 	~Identifier() = default;
 

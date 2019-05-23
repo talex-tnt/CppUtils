@@ -76,7 +76,6 @@ inline bool operator!=(const Identifier<TraitT, ValueT>& lhs, const Identifier<T
 	return !( lhs == rhs );
 }
 
-
 template<typename TraitT, typename ValueT>
 InvalidableIdentifier<TraitT, ValueT>::InvalidableIdentifier()
 	: Identifier(k_invalidValue)
@@ -104,4 +103,20 @@ bool InvalidableIdentifier<TraitT, ValueT>::IsValid() const
 	return GetValue() != k_invalidValue;
 }
 
+template<typename TraitT, typename ValueT>
+inline std::ostream& operator<<(std::ostream& o_stream, const Identifier<TraitT, ValueT>& i_identifier)
+{
+	o_stream << i_identifier.GetValue();
+	return o_stream;
+}
+
+template<typename TraitT, typename ValueT>
+inline std::istream& operator>>(std::istream& i_stream, Identifier<TraitT, ValueT>& i_identifier)
+{
+	i_stream >> i_identifier.m_value;
+	return i_stream;
+}
+
 } //namespace utils
+
+
