@@ -22,6 +22,10 @@ IdentifierName::BaseT::k_invalidValue = InvalidValue;
 
 namespace utils
 {
+
+template<typename Traits, typename ValueT>
+struct CmpIdentifier;
+
 template<typename Traits, typename ValueT>
 class Identifier
 {
@@ -46,6 +50,8 @@ public:
 	friend std::istream& operator>>(std::istream& i_stream, Identifier<Traits, ValueT>& i_identifier);
 
 	using ValueType = ValueT;
+	using CmpType = CmpIdentifier<Traits, ValueT>;
+
 protected:	// This class is meant NOT to be deleted polymorphically
 	~Identifier() = default;
 
@@ -74,6 +80,12 @@ public:
 	explicit InvalidableIdentifier(const ValueT& i_value);
 	bool IsValid() const;
 	static const ValueT k_invalidValue;
+};
+
+template<typename Traits, typename ValueT>
+struct CmpIdentifier
+{
+	bool operator()(const Identifier<Traits, ValueT>& lhs, const Identifier<Traits, ValueT>& rhs) const;
 };
 
 } //namespace utils

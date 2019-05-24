@@ -117,6 +117,13 @@ inline std::istream& operator>>(std::istream& i_stream, Identifier<Traits, Value
 	return i_stream;
 }
 
+
+template<typename Traits, typename ValueT>
+bool utils::CmpIdentifier<Traits, ValueT>::operator()(Identifier<Traits, ValueT> const& lhs, Identifier<Traits, ValueT> const& rhs) const
+{
+	return lhs.GetValue() < rhs.GetValue();
+}
+
 } //namespace utils
 
 

@@ -18,6 +18,7 @@ struct StringIdentifierFixtureBase
 	IdType m_id2 = IdType("Derek");
 	IdType GetId() const { return IdType("Jordan"); }
 	std::string ToString(const IdType& i_type) const { return i_type.GetValue(); }
+	std::vector<IdType> GetValues() const { return { IdType("A"), IdType("B"), IdType("C") }; }
 };
 
 template <typename IdType>
@@ -29,6 +30,7 @@ struct IntIdentifierFixtureBase
 	IdType m_id2 = IdType(3);
 	IdType GetId() const { return IdType(4); }
 	std::string ToString(const IdType& i_type) const { return std::to_string(i_type.GetValue()); }
+	std::vector<IdType> GetValues() const { return { IdType(0), IdType(1), IdType(2) }; }
 };
 
 template <typename T>
@@ -167,5 +169,24 @@ TYPED_TEST(IdentifierFixture, TestInputStream)
 	EXPECT_EQ(GetId(), m_id);
 }
 
+TYPED_TEST(IdentifierFixture, TestCmpOperator)
+{
+	const std::vector<TypeParam> values = GetValues();
+	using VecRIt = std::vector<TypeParam>::const_reverse_iterator;
+	using VecIt = std::vector<TypeParam>::const_iterator;
+
+	std::set<TypeParam, TypeParam::CmpType> set;
+	for ( VecRIt it = values.crbegin(); it != values.crend(); ++it)
+	{
+		set.insert(TypeParam(*it));
+	}
+	using SetIt = std::set<TypeParam>::const_iterator; 
+	SetIt setIt = set.cbegin();
+	VecIt vecIt = values.cbegin();
+	for ( ; setIt != set.cend(); ++setIt, ++vecIt )
+	{
+		EXPECT_EQ(*setIt, *vecIt);
+	}
+}
 }
 
