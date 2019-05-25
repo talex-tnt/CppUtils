@@ -1,6 +1,11 @@
 #include "pch.h"
 #include "../CppUtils/Source/Identifier.h"
 
+#include <vector>
+#include <set>
+#include <unordered_set>
+
+
 DEFINE_IDENTIFIER(StringId, std::string);
 DEFINE_IDENTIFIER(IntId, std::int32_t);
 DEFINE_IDENTIFIER_WITH_INVALID_VALUE(InvStringId, std::string, "Null");
@@ -175,7 +180,7 @@ TYPED_TEST(IdentifierFixture, TestCmpOperator)
 	using VecRIt = std::vector<TypeParam>::const_reverse_iterator;
 	using VecIt = std::vector<TypeParam>::const_iterator;
 
-	std::set<TypeParam, TypeParam::CmpType> set;
+	std::set<TypeParam, TypeParam::LessCmp> set;
 	for ( VecRIt it = values.crbegin(); it != values.crend(); ++it)
 	{
 		set.insert(TypeParam(*it));
@@ -188,5 +193,23 @@ TYPED_TEST(IdentifierFixture, TestCmpOperator)
 		EXPECT_EQ(*setIt, *vecIt);
 	}
 }
+
+TYPED_TEST(IdentifierFixture, TestUnorderedSetKey)
+{
+	std::unordered_set<TypeParam, TypeParam::Hasher> set;
+	set.emplace(m_id);
+	set.emplace(m_constId);
+	{
+		auto it = set.find(m_id);
+		EXPECT_TRUE(it != set.cend());
+		EXPECT_EQ(*it, m_id);
+	}
+	{
+		auto it = set.find(m_constId);
+		EXPECT_TRUE(it != set.cend());
+		EXPECT_EQ(*it, m_constId);
+	}
+}
+
 }
 

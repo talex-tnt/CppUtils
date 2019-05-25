@@ -50,7 +50,16 @@ public:
 	friend std::istream& operator>>(std::istream& i_stream, Identifier<Traits, ValueT>& i_identifier);
 
 	using ValueType = ValueT;
-	using CmpType = CmpIdentifier<Traits, ValueT>;
+
+	struct LessCmp
+	{
+		bool operator()(const Identifier<Traits, ValueT>& lhs, const Identifier<Traits, ValueT>& rhs) const;
+	};
+
+	struct Hasher
+	{
+		std::size_t operator()(const Identifier<Traits, ValueT>& lhs) const;
+	};
 
 protected:	// This class is meant NOT to be deleted polymorphically
 	~Identifier() = default;
@@ -80,12 +89,6 @@ public:
 	explicit InvalidableIdentifier(const ValueT& i_value);
 	bool IsValid() const;
 	static const ValueT k_invalidValue;
-};
-
-template<typename Traits, typename ValueT>
-struct CmpIdentifier
-{
-	bool operator()(const Identifier<Traits, ValueT>& lhs, const Identifier<Traits, ValueT>& rhs) const;
 };
 
 } //namespace utils
