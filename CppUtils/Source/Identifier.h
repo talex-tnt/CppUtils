@@ -2,18 +2,16 @@
 #include <iosfwd>
 
 #define DEFINE_IDENTIFIER(IdentifierName, IdentifierType) \
-class IdentifierName ## Traits {}; \
-struct IdentifierName : public utils::Identifier<IdentifierName ## Traits, IdentifierType> \
+struct IdentifierName : public utils::Identifier<IdentifierType> \
 { \
-	using BaseT = utils::Identifier<IdentifierName ## Traits, IdentifierType>; \
+	using BaseT = utils::Identifier<IdentifierType>; \
 	using BaseT::BaseT; \
 }; 
 
 #define DEFINE_IDENTIFIER_WITH_INVALID_VALUE(IdentifierName, IdentifierType, InvalidValue) \
-class IdentifierName ## Traits {}; \
-struct IdentifierName : public utils::InvalidableIdentifier<IdentifierName ## Traits, IdentifierType> \
+struct IdentifierName : public utils::InvalidableIdentifier<IdentifierType> \
 { \
-	using BaseT = utils::InvalidableIdentifier<IdentifierName ## Traits, IdentifierType>; \
+	using BaseT = utils::InvalidableIdentifier<IdentifierType>; \
 	using BaseT::BaseT; \
 }; \
 template<> \
@@ -23,42 +21,42 @@ IdentifierName::BaseT::k_invalidValue = InvalidValue;
 namespace utils
 {
 
-template<typename Traits, typename ValueT>
+template<typename ValueT>
 struct CmpIdentifier;
 
-template<typename Traits, typename ValueT>
+template<typename ValueT>
 class Identifier
 {
 public:
 	explicit Identifier(ValueT&& i_value);
 	explicit Identifier(const ValueT& i_value);
 
-	Identifier(const Identifier<Traits, ValueT>& rhs);
-	Identifier<Traits, ValueT>& operator=(const Identifier<Traits, ValueT>& rhs)&;
+	Identifier(const Identifier<ValueT>& rhs);
+	Identifier<ValueT>& operator=(const Identifier<ValueT>& rhs)&;
 
 	//move semantics
-	explicit Identifier(Identifier<Traits, ValueT>&& rhs);
-	Identifier<Traits, ValueT>& operator=(Identifier<Traits, ValueT>&& rhs)&;
+	explicit Identifier(Identifier<ValueT>&& rhs);
+	Identifier<ValueT>& operator=(Identifier<ValueT>&& rhs)&;
 
 	const ValueT& GetValue() const&;
 	ValueT GetValue() const&&;
 
-	template<typename Traits, typename ValueT>
-	friend std::ostream& operator<<(std::ostream& o_stream, const Identifier<Traits, ValueT>& i_identifier);
+	template<typename ValueT>
+	friend std::ostream& operator<<(std::ostream& o_stream, const Identifier<ValueT>& i_identifier);
 
-	template<typename Traits, typename ValueT>
-	friend std::istream& operator>>(std::istream& i_stream, Identifier<Traits, ValueT>& i_identifier);
+	template<typename ValueT>
+	friend std::istream& operator>>(std::istream& i_stream, Identifier<ValueT>& i_identifier);
 
 	using ValueType = ValueT;
 
 	struct LessCmp
 	{
-		bool operator()(const Identifier<Traits, ValueT>& lhs, const Identifier<Traits, ValueT>& rhs) const;
+		bool operator()(const Identifier<ValueT>& lhs, const Identifier<ValueT>& rhs) const;
 	};
 
 	struct Hasher
 	{
-		std::size_t operator()(const Identifier<Traits, ValueT>& lhs) const;
+		std::size_t operator()(const Identifier<ValueT>& lhs) const;
 	};
 
 protected:	// This class is meant NOT to be deleted polymorphically
@@ -79,8 +77,8 @@ private:
 };
 
 
-template<typename Traits, typename ValueT>
-class InvalidableIdentifier : public Identifier<Traits, ValueT>
+template<typename ValueT>
+class InvalidableIdentifier : public Identifier<ValueT>
 {
 public:
 	using ValueType = ValueT;
