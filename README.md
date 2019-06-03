@@ -28,7 +28,7 @@ class PlayerState
 {
 public:
   PlayerId GetId() const { return m_id; }
-  PlayerLevel GetCurrentLevel const { return m_currentLevel; }
+  PlayerLevel GetCurrentLevel() const { return m_currentLevel; }
   // ...
 private:
   PlayerId m_id;
