@@ -20,9 +20,9 @@ public:
 
 private:
 	class Slot;
-	using SlotPtr = std::shared_ptr<Slot>;
+	using SlotPtr		= std::shared_ptr<Slot>;
 	using DeleteSlotFun = std::function<void(const SlotPtr&)>;
-	using CallbackT = std::function<void(ArgsT...)>;
+	using CallbackT		= std::function<void(ArgsT...)>;
 	
 public:
 	class Connection;
