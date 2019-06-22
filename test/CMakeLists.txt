@@ -33,7 +33,9 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 
 # Now simply link against gtest or gtest_main as needed. Eg
-add_executable(cpputils-tests ${CMAKE_CURRENT_SOURCE_DIR}/src/IdentifierParamTests.cpp)
+add_executable(cpputils-tests 
+	${CMAKE_CURRENT_SOURCE_DIR}/src/IdentifierParamTests.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/src/SignalTests.cpp)
 
 target_link_libraries(cpputils-tests gtest_main  sub::cpp-utils)
 
