@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include <assert.h>
+#include <thread>
 
 namespace utils
 {
@@ -37,6 +38,7 @@ private:
 private:
 	SlotsCollection m_slots;
 	std::shared_ptr<DeleteSlotFun> m_deleteSlotFun;
+	const std::thread::id m_threadId;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -69,7 +71,10 @@ class Signal<ArgsT...>::Connection  //ScopedConnection
 {
 	friend class Signal;
 private:
-	Connection(const std::shared_ptr<Slot>& i_slot, std::weak_ptr<DeleteSlotFun> i_deleteSlotFun);
+	Connection(
+		const std::shared_ptr<Slot>& i_slot, 
+		const std::weak_ptr<DeleteSlotFun>& i_deleteSlotFun,
+		std::thread::id i_threadId);
 public:
 	Connection(Connection&&)					= default;
 	Connection& operator=(Connection&&)			= default;
@@ -85,6 +90,7 @@ public:
 private:
 	std::shared_ptr<Slot> m_slot;
 	std::weak_ptr<DeleteSlotFun> m_deleteSlotFun;
+	const std::thread::id m_threadId;
 };
 
 } //namespace utils 
