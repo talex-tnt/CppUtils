@@ -43,14 +43,36 @@ const PlayerState& FindPlayerState(PlayerId i_id);
 class PlayerWidget
 {
 public:
-  using OnSelectSig = boost::signal<void (PlayerId)>;
-  using Connection boost::signals::connection;
-  using SlotFunType = OnSelectSig::slot_function_type;
+  using OnSelectSig = utils::Signal<PlayerId>;
+  using Connection OnSelectSig::Connection;
   // ...
   PlayerWidget(PlayerId i_playerId, const PlayerName& i_name, PlayerImageId i_playerImageId);
-  Connection DoOnSelected(SlotFunType i_slot);
+  Connection DoOnSelected(std::function<void(PlayerId>> i_slot);
   // ...
  private:
   PlayerId m_playerId;
   OnSelectSig m_onSelectSignal;
 }
+```
+
+### Signal-Slots
+C++11 Implementation of the Signal-Slot pattern.
+
+It allows to connect Slots (Listeners) to a Signal object (Emitter).
+The Signal object can Emit() the signal letting the Emitter notify the connected listeners.
+The Signal's Connect method returns a (Scoped) Connection object, 
+as long as this object exists this connection will exist as well (unless the Disconnect() method is called). 
+
+Example:
+```c++
+int value = 0;
+
+using Sig = utils::Signal<int>;
+
+Sig::Connection c1 = sig.Connect([ &value ] (int delta) { value += delta; });
+
+sig.Emit(100);
+
+EXPECT_EQ(value, 100);
+
+```
