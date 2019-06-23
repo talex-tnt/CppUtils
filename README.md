@@ -64,7 +64,6 @@ The Signal object can Emit() a signal to notify all the connected listeners.
 
 The Signal's Connect() method returns a (Scoped) Connection object, 
 as long as this object exists the connection will exist as well 
-
 (unless the Disconnect() method is called). 
 
 Example:
