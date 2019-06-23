@@ -5,36 +5,208 @@
 namespace
 {
 
-void square(int& value) { value *= value; }
+void Square(int& value) { value *= value; }
+void Sum(int a, int b, int& result) { result = a + b; }
 
-TEST(SignalTest, myTest)
+template<typename T>
+class Delegate
 {
-	int value = 0;
-	utils::Signal<int> sig;
-	auto c = sig.Connect([ &value ] (int v) { value += v; });
+public:
+	Delegate(T i_value) : m_value(i_value) { }
+	const T& GetValue() const& noexcept { return m_value; }
+	void SetValue(const T& i_value) noexcept { m_value = i_value; }
+private:
+	T m_value;
+};
+
+TEST(SignalTest, SignalConnectedWithLambda)
+{
+	using Sig = utils::Signal<int>;
+	const int original = 0;
+	int value = original;
+	Sig sig;
+	Sig::Connection c = sig.Connect([ &value ] (int delta) { value += delta; });
 
 	const int delta = 100;
 	sig.Emit(delta);
 
-	EXPECT_EQ(value, delta);
+	EXPECT_EQ(value, original + delta);
+}
+
+TEST(SignalTest, SignalDisconnectedWithLambda)
+{
+	using Sig = utils::Signal<int>;
+	const int original = 0;
+	int value = original;
+	Sig sig;
+	{
+		Sig::Connection c = sig.Connect([ &value ] (int delta) { value += delta; });
+	}
+	const int delta = 100;
+	sig.Emit(delta);
+
+	EXPECT_EQ(value, original);
 }
 
 
-TEST(SignalTest, myTest2)
+TEST(SignalTest, SignalConnectedWithFunc)
 {
-	int value = 10;
-	
-	int expected = value;
-	square(expected);
-	
-	utils::Signal<int&> sig;
-	auto c = sig.Connect(square);
+	using Sig = utils::Signal<int&>;
 
-	sig.Emit (value);
+	const int original = 10;
+	int value = original;
+	
+	int expected = original;
+	Square(expected);
+	
+	Sig sig;
+	Sig::Connection c = sig.Connect(Square);
+
+	sig.Emit(value);
 
 	EXPECT_EQ(value, expected);
-
 }
 
+TEST(SignalTest, SignalConnectedWithMethod)
+{
+	using T = int;
+	const T original = 0;
+	const T expected = 100;
+	using Sig = utils::Signal<const T&>;
+	Delegate<T> del(original);
+
+	Sig sig;
+	Sig::Connection c = sig.ConnectB(&Delegate<T>::SetValue, &del, std::placeholders::_1);
+
+	sig.Emit(expected);
+
+	EXPECT_EQ(del.GetValue(), expected);
 }
+
+
+TEST(SignalTest, SignalDisconnectedWithMethod)
+{
+	using T = int;
+	const T original = 0;
+	const T expected = 100;
+	using Sig = utils::Signal<const T&>;
+	Delegate<T> del(original);
+
+	Sig sig;
+	{
+		Sig::Connection c = sig.ConnectB(&Delegate<T>::SetValue, &del, std::placeholders::_1);
+	}
+
+	sig.Emit(expected);
+
+	EXPECT_EQ(del.GetValue(), original);
+}
+
+
+TEST(SignalTest, SignalConnectedWithFuncSum2)
+{
+	using Sig = utils::Signal<int, int, int&>;
+
+	const int original1 = 7;
+	const int original2 = 3;
+	int result = 0;
+
+	int expected = 0;
+	Sum(original1, original2, expected);
+
+	Sig sig;
+	Sig::Connection c = sig.Connect(Sum);
+
+	sig.Emit(original1, original2, result);
+
+	EXPECT_EQ(result, expected);
+}
+
+
+TEST(SignalTest, SignalConnectedWithFuncSum2Placeholders)
+{
+	using Sig = utils::Signal<int&>;
+
+	const int original1 = 17;
+	const int original2 = 13;
+	int result = 0;
+
+	int expected = 0;
+	Sum(original1, original2, expected);
+
+	Sig sig;
+
+	Sig::Connection c = sig.ConnectB(&Sum, original1, original2, std::placeholders::_1);
+
+	sig.Emit(result);
+
+	EXPECT_EQ(result, expected);
+}
+
+TEST(SignalTest, SignalCheckSlotCount)
+{
+	using Sig = utils::Signal<int>;
+	Sig sig;
+	{
+		Sig::Connection c1 = sig.Connect([] (int delta) { std::cout << "Slot Test" << std::endl; });
+		{
+			Sig::Connection c2 = sig.Connect([] (int delta) { std::cout << "Slot Test" << std::endl; });
+			EXPECT_EQ(sig.GetSlotCount(), 2);
+		}
+		EXPECT_EQ(sig.GetSlotCount(), 1);
+	}
+	EXPECT_EQ(sig.GetSlotCount(), 0);
+}
+
+
+TEST(SignalTest, SignalBlockedWithLambda)
+{
+	using Sig = utils::Signal<int>;
+	const int original = 0;
+	int value = original;
+	const int delta = 100;
+
+	Sig sig;
+	
+	Sig::Connection c = sig.Connect([ &value ] (int delta) { value += delta; });
+	c.SetBlocked(true);
+
+
+	sig.Emit(delta);
+	EXPECT_EQ(value, original);
+
+	c.SetBlocked(false);
+	sig.Emit(delta);
+	EXPECT_EQ(value, original + delta);
+}
+
+TEST(SignalTest, SignalExplicitDiscWithLambda)
+{
+	using Sig = utils::Signal<int>;
+	const int original = 0;
+	int value = original;
+	const int delta = 100;
+
+	Sig sig;
+
+	Sig::Connection c = sig.Connect([ &value ] (int delta) { value += delta; });
+	c.Disconnect();
+
+
+	sig.Emit(delta);
+	EXPECT_EQ(value, original);
+}
+
+TEST(SignalTest, SignalCheckIsConnected)
+{
+	using Sig = utils::Signal<int>;
+
+	Sig sig;
+	Sig::Connection c = sig.Connect([ ] (int delta) { });
+	EXPECT_TRUE(c.IsConnected());
+	c.Disconnect();
+	EXPECT_FALSE(c.IsConnected());
+}
+
+} //namespace
 
