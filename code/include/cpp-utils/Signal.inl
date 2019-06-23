@@ -9,6 +9,8 @@ template<typename ... ArgsT>
 inline utils::Signal<ArgsT...>::Signal()
 	: m_deleteSlotFun(std::make_shared<DeleteSlotFun>(
 		std::bind(&Signal::DeleteSlot, this, std::placeholders::_1)))
+	, m_isSlotConnectedFun(std::make_shared<IsSlotConnectedFun>(
+		std::bind(&Signal::IsSlotConnected, this, std::placeholders::_1)))
 	, m_threadId(std::this_thread::get_id())
 { }
 
@@ -19,7 +21,20 @@ utils::Signal<ArgsT...>::Connect(CallbackT i_callback)
 	assert(m_threadId == std::this_thread::get_id());
 	std::shared_ptr<Slot> slot = std::make_shared<Slot>(i_callback);
 	m_slots.emplace_back(slot);
-	return Connection(slot, m_deleteSlotFun, m_threadId);
+	return Connection(slot, m_deleteSlotFun, m_isSlotConnectedFun, m_threadId);
+}
+
+template<typename ... ArgsT>
+template<typename _Fx, typename ... _Types>
+inline typename utils::Signal<ArgsT...>::Connection
+utils::Signal<ArgsT...>::ConnectB(_Fx&& i_fun, _Types&&... i_args)
+{
+	assert(m_threadId == std::this_thread::get_id());
+	std::shared_ptr<Slot> slot = std::make_shared<Slot>(
+		std::bind(std::forward<_Fx>(i_fun), std::forward<_Types>(i_args)...)
+	);
+	m_slots.emplace_back(slot);
+	return Connection(slot, m_deleteSlotFun, m_isSlotConnectedFun, m_threadId);
 }
 
 template<typename ... ArgsT>
@@ -47,6 +62,15 @@ void utils::Signal<ArgsT...>::DeleteSlot(const SlotPtr& i_slot)
 	{
 		m_slots.erase(it);
 	}
+}
+
+template<typename ... ArgsT>
+bool utils::Signal<ArgsT...>::IsSlotConnected(const SlotPtr& i_slot) const
+{
+	assert(m_threadId == std::this_thread::get_id());
+	SlotsCollection::const_iterator end = m_slots.cend();
+	SlotsCollection::const_iterator it = std::find(m_slots.cbegin(), end, i_slot);
+	return ( it != end );
 }
 
 template<typename ... ArgsT>
@@ -79,7 +103,7 @@ inline bool utils::Signal<ArgsT...>::Slot::IsBlocked() const noexcept
 }
 
 template<typename ... ArgsT>
-inline bool utils::Signal<ArgsT...>::Slot::SetBlocked(bool i_isBlocked) noexcept
+inline void utils::Signal<ArgsT...>::Slot::SetBlocked(bool i_isBlocked) noexcept
 {
 	m_isBlocked = i_isBlocked;
 }
@@ -90,8 +114,9 @@ template<typename  ... ArgsT>
 inline utils::Signal<ArgsT...>::Connection::Connection(
 	const std::shared_ptr<Slot>& i_slot, 
 	const std::weak_ptr<DeleteSlotFun>& i_deleteSlotFun,
+	const std::weak_ptr<IsSlotConnectedFun>& i_isSlotConnectedFun,
 	const std::thread::id i_threadId)
-	: m_slot(i_slot), m_deleteSlotFun(i_deleteSlotFun), m_threadId(i_threadId)
+	: m_slot(i_slot), m_deleteSlotFun(i_deleteSlotFun), m_isSlotConnectedFun(i_isSlotConnectedFun), m_threadId(i_threadId)
 { }
 
 template<typename ... ArgsT>
@@ -109,7 +134,7 @@ inline bool utils::Signal<ArgsT...>::Connection::IsBlocked() const noexcept
 }
 
 template<typename ... ArgsT>
-inline bool utils::Signal<ArgsT...>::Connection::SetBlocked(bool i_isBlocked) noexcept
+inline void utils::Signal<ArgsT...>::Connection::SetBlocked(bool i_isBlocked) noexcept
 {
 	assert(m_threadId == std::this_thread::get_id());
 	m_slot->SetBlocked(i_isBlocked);
@@ -127,6 +152,20 @@ inline void utils::Signal<ArgsT...>::Connection::Disconnect() noexcept
 			m_slot = nullptr;
 		}
 	}
+}
+
+template<typename ... ArgsT>
+inline bool utils::Signal<ArgsT...>::Connection::IsConnected() const
+{
+	assert(m_threadId == std::this_thread::get_id());
+	if ( m_slot )
+	{
+		if ( std::shared_ptr<IsSlotConnectedFun> isSlotConnectedFun = m_isSlotConnectedFun.lock() )
+		{
+			return ( *isSlotConnectedFun )( m_slot );
+		}
+	}
+	return false;
 }
 
 } //namespace utils
