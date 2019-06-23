@@ -59,9 +59,13 @@ public:
 C++11 Implementation of the Signal-Slot pattern.
 
 It allows to connect Slots (Listeners) to a Signal object (Emitter).
-The Signal object can Emit() the signal letting the Emitter notify the connected listeners.
-The Signal's Connect method returns a (Scoped) Connection object, 
-as long as this object exists this connection will exist as well (unless the Disconnect() method is called). 
+
+The Signal object can Emit() a signal to notify all the connected listeners.
+
+The Signal's Connect() method returns a (Scoped) Connection object, 
+as long as this object exists the connection will exist as well 
+
+(unless the Disconnect() method is called). 
 
 Example:
 ```c++
