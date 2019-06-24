@@ -230,5 +230,18 @@ TEST(SignalTest, AssignConnectionCheck)
 	EXPECT_FALSE(c.IsConnected());
 }
 
+TEST(SignalTest, DisconnetionWithSignalDestructionCheck)
+{
+	using Sig = utils::Signal<int>;
+	Sig::Connection c;
+	{
+		Sig sig;
+		c = sig.Connect([] (int delta) { });
+		EXPECT_EQ(sig.GetSlotCount(), 1u);
+		EXPECT_TRUE(c.IsConnected());
+	}
+	EXPECT_FALSE(c.IsConnected());
+}
+
 } //namespace
 
