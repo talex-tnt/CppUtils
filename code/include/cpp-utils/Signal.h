@@ -6,6 +6,8 @@
 
 namespace utils
 {
+class ISlot;
+class Connection;
 
 template<typename ... ArgsT>
 class Signal
@@ -19,14 +21,10 @@ public:
 	Signal(const Signal&)				= delete;
 	Signal& operator=(const Signal&)	= delete;
 
-private:
-	class Slot;
-	using SlotPtr		= std::shared_ptr<Slot>;
-	using DeleteSlotFun = std::function<void(const SlotPtr&)>;
+	using Connection = Connection;
 
 public:
 	using CallbackT = std::function<void(ArgsT...)>;
-	class Connection;
 	Connection Connect(CallbackT i_callback);
 	
 	template<typename _Fx, typename ... _Types>
@@ -36,27 +34,37 @@ public:
 	std::size_t GetSlotCount() const noexcept;
 
 private:
-	using SlotsCollection = std::vector<SlotPtr>;
-	void DeleteSlot(const SlotPtr& i_slot);
-	bool IsSlotConnected(const SlotPtr& i_slot) const;
+	using ISlotPtr = std::shared_ptr<ISlot>;
+
+	void DeleteSlot(const ISlotPtr& i_slot);
+	bool IsSlotConnected(const ISlotPtr& i_slot) const;
 
 private:
+	class Slot;
+	using SlotPtr = std::shared_ptr<Slot>;
+	using SlotsCollection = std::vector<SlotPtr>;
 	SlotsCollection m_slots;
+
+	using DeleteSlotFun = std::function<void(const ISlotPtr&)>;
 	std::shared_ptr<DeleteSlotFun> m_deleteSlotFun;
+
 	const std::thread::id m_threadId;
 };
 
 //////////////////////////////////////////////////////////////////////////
 //							Connection
 //////////////////////////////////////////////////////////////////////////
-template<typename ... ArgsT>
-class Signal<ArgsT...>::Connection  //ScopedConnection
+class Connection  //ScopedConnection
 {
-	friend class Signal;
+	//friend class Signal;
 private:
+	using SlotPtr = std::shared_ptr<ISlot>;
+	using DeleteSlotFun = std::function<void(const SlotPtr&)>;
+
+public:
 	Connection(
-		const std::weak_ptr<Slot>& i_slot,
-		const std::weak_ptr<DeleteSlotFun>& i_deleteSlotFun,
+		std::weak_ptr<ISlot> i_slot,
+		std::weak_ptr<DeleteSlotFun> i_deleteSlotFun,
 		std::thread::id i_threadId);
 public:
 	Connection();
@@ -74,7 +82,7 @@ public:
 	void Disconnect();
 
 private:
-	std::weak_ptr<Slot> m_slot;
+	std::weak_ptr<ISlot> m_slot;
 	std::weak_ptr<DeleteSlotFun> m_deleteSlotFun;
 	std::thread::id m_threadId;
 };

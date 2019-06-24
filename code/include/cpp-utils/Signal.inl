@@ -5,8 +5,16 @@ namespace utils
 //////////////////////////////////////////////////////////////////////////
 //								Slot
 //////////////////////////////////////////////////////////////////////////
+class ISlot
+{
+public:
+	virtual ~ISlot() = default;
+	virtual bool IsBlocked() const = 0;
+	virtual void SetBlocked(bool i_isBlocked) = 0; 
+};
+
 template<typename ... ArgsT>
-class Signal<ArgsT...>::Slot
+class Signal<ArgsT...>::Slot : public ISlot
 {
 public:
 	Slot(CallbackT i_callback);
@@ -18,8 +26,8 @@ public:
 	Slot& operator=(const Slot&) = delete;
 
 	void operator()(ArgsT ... i_args);
-	bool IsBlocked() const noexcept;
-	void SetBlocked(bool i_isBlocked) noexcept;
+	bool IsBlocked() const noexcept final override;
+	void SetBlocked(bool i_isBlocked) noexcept final override;
 
 private:
 	CallbackT m_callback;
@@ -43,26 +51,24 @@ inline utils::Signal<ArgsT...>::Signal()
 { }
 
 template<typename ... ArgsT>
-inline typename utils::Signal<ArgsT...>::Connection
-utils::Signal<ArgsT...>::Connect(CallbackT i_callback)
+inline utils::Connection utils::Signal<ArgsT...>::Connect(CallbackT i_callback)
 {
 	assert(m_threadId == std::this_thread::get_id());
-	std::shared_ptr<Slot> slot = std::make_shared<Slot>(i_callback);
-	m_slots.emplace_back(slot);
-	return Connection(slot, m_deleteSlotFun, m_threadId);
+
+	m_slots.emplace_back(std::make_shared<Slot>(i_callback));
+	return Connection(m_slots.back(), m_deleteSlotFun, m_threadId);
 }
 
 template<typename ... ArgsT>
 template<typename _Fx, typename ... _Types>
-inline typename utils::Signal<ArgsT...>::Connection
-utils::Signal<ArgsT...>::ConnectB(_Fx&& i_fun, _Types&&... i_args)
+inline utils::Connection utils::Signal<ArgsT...>::ConnectB(_Fx&& i_fun, _Types&&... i_args)
 {
 	assert(m_threadId == std::this_thread::get_id());
-	std::shared_ptr<Slot> slot = std::make_shared<Slot>(
+	
+	m_slots.emplace_back(std::make_shared<Slot>(
 		std::bind(std::forward<_Fx>(i_fun), std::forward<_Types>(i_args)...)
-	);
-	m_slots.emplace_back(slot);
-	return Connection(slot, m_deleteSlotFun, m_threadId);
+	));
+	return Connection(m_slots.back(), m_deleteSlotFun, m_threadId);
 }
 
 template<typename ... ArgsT>
@@ -79,7 +85,7 @@ inline void utils::Signal<ArgsT...>::Emit(ArgsT... i_args)
 }
 
 template<typename ... ArgsT>
-void utils::Signal<ArgsT...>::DeleteSlot(const SlotPtr& i_slot)
+void utils::Signal<ArgsT...>::DeleteSlot(const ISlotPtr& i_slot)
 {
 	assert(m_threadId == std::this_thread::get_id());
 
@@ -93,7 +99,7 @@ void utils::Signal<ArgsT...>::DeleteSlot(const SlotPtr& i_slot)
 }
 
 template<typename ... ArgsT>
-bool utils::Signal<ArgsT...>::IsSlotConnected(const SlotPtr& i_slot) const
+bool utils::Signal<ArgsT...>::IsSlotConnected(const ISlotPtr& i_slot) const
 {
 	assert(m_threadId == std::this_thread::get_id());
 	SlotsCollection::const_iterator end = m_slots.cend();
@@ -138,28 +144,24 @@ inline void utils::Signal<ArgsT...>::Slot::SetBlocked(bool i_isBlocked) noexcept
 
 // Connection //////////////////////////////////////////////////////////////////////////
 
-template<typename  ... ArgsT>
-inline utils::Signal<ArgsT...>::Connection::Connection(
-	const std::weak_ptr<Slot>& i_slot, 
-	const std::weak_ptr<DeleteSlotFun>& i_deleteSlotFun,
+inline utils::Connection::Connection(
+	std::weak_ptr<ISlot> i_slot, 
+	std::weak_ptr<DeleteSlotFun> i_deleteSlotFun,
 	const std::thread::id i_threadId)
-	: m_slot(i_slot), m_deleteSlotFun(i_deleteSlotFun), m_threadId(i_threadId)
+	: m_slot(std::move(i_slot)), m_deleteSlotFun(std::move(i_deleteSlotFun)), m_threadId(i_threadId)
 { }
 
-template<typename  ... ArgsT>
-inline utils::Signal<ArgsT...>::Connection::Connection()
+inline utils::Connection::Connection()
 	: m_slot(), m_deleteSlotFun(), m_threadId(std::this_thread::get_id())
 { }
 
-template<typename  ... ArgsT>
-inline utils::Signal<ArgsT...>::Connection::Connection(Connection&& rhs)
+inline utils::Connection::Connection(Connection&& rhs)
 	: m_slot(std::move(rhs.m_slot))
 	, m_deleteSlotFun(std::move(rhs.m_deleteSlotFun))
 	, m_threadId(rhs.m_threadId)
 { }
 
-template<typename  ... ArgsT>
-inline typename utils::Signal<ArgsT...>::Connection& utils::Signal<ArgsT...>::Connection::operator=(Connection&& rhs)
+inline typename utils::Connection& utils::Connection::operator=(Connection&& rhs)
 {
 	if (this != &rhs)
 	{
@@ -170,39 +172,35 @@ inline typename utils::Signal<ArgsT...>::Connection& utils::Signal<ArgsT...>::Co
 	return *this;
 }
 
-template<typename ... ArgsT>
-inline utils::Signal<ArgsT...>::Connection::~Connection()
+inline utils::Connection::~Connection()
 {
 	assert(m_threadId == std::this_thread::get_id());
 	Disconnect();
 }
 
-template<typename ... ArgsT>
-inline bool utils::Signal<ArgsT...>::Connection::IsBlocked() const noexcept
+inline bool utils::Connection::IsBlocked() const noexcept
 {
 	assert(m_threadId == std::this_thread::get_id());
-	if ( std::shared_ptr<Slot> slot = m_slot.lock() )
+	if ( std::shared_ptr<ISlot> slot = m_slot.lock() )
 	{
 		return slot->IsBlocked();
 	}
 	return false;
 }
 
-template<typename ... ArgsT>
-inline void utils::Signal<ArgsT...>::Connection::SetBlocked(bool i_isBlocked) noexcept
+inline void utils::Connection::SetBlocked(bool i_isBlocked) noexcept
 {
 	assert(m_threadId == std::this_thread::get_id());
-	if ( std::shared_ptr<Slot> slot = m_slot.lock() )
+	if ( std::shared_ptr<ISlot> slot = m_slot.lock() )
 	{
 		slot->SetBlocked(i_isBlocked);
 	}
 }
 
-template<typename ... ArgsT>
-inline void utils::Signal<ArgsT...>::Connection::Disconnect()
+inline void utils::Connection::Disconnect()
 {
 	assert(m_threadId == std::this_thread::get_id());
-	std::shared_ptr<Slot> slot = m_slot.lock();
+	std::shared_ptr<ISlot> slot = m_slot.lock();
 	std::shared_ptr<DeleteSlotFun> slotDeleter = m_deleteSlotFun.lock();
 	if ( slot && slotDeleter )
 	{
@@ -210,8 +208,7 @@ inline void utils::Signal<ArgsT...>::Connection::Disconnect()
 	}
 }
 
-template<typename ... ArgsT>
-inline bool utils::Signal<ArgsT...>::Connection::IsConnected() const
+inline bool utils::Connection::IsConnected() const
 {
 	assert(m_threadId == std::this_thread::get_id());
 	return !m_slot.expired();

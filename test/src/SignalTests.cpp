@@ -243,5 +243,25 @@ TEST(SignalTest, DisconnetionWithSignalDestructionCheck)
 	EXPECT_FALSE(c.IsConnected());
 }
 
+
+TEST(SignalTest, SignalCheckMultipleConnections)
+{
+	using Sig = utils::Signal<>;
+	Sig sig;
+	{
+		Sig::Connection c1 = sig.Connect([] () { std::cout << "Slot Test" << std::endl; });
+		EXPECT_TRUE(c1.IsConnected());
+		{
+			Sig::Connection c2 = sig.Connect([] () { std::cout << "Slot Test2" << std::endl; });
+			EXPECT_TRUE(c2.IsConnected());
+			{
+				Sig::Connection c3 = sig.Connect([] () { std::cout << "Slot Test3" << std::endl; });
+				EXPECT_TRUE(c3.IsConnected());
+			}
+			EXPECT_TRUE(c2.IsConnected());
+		}
+		EXPECT_TRUE(c1.IsConnected());
+	}
+}
 } //namespace
 
