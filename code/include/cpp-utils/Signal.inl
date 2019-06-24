@@ -2,6 +2,36 @@
 
 namespace utils
 {
+//////////////////////////////////////////////////////////////////////////
+//								Slot
+//////////////////////////////////////////////////////////////////////////
+template<typename ... ArgsT>
+class Signal<ArgsT...>::Slot
+{
+public:
+	Slot(CallbackT i_callback);
+	Slot(Slot&&) = default;
+	Slot& operator=(Slot&&) = default;
+	~Slot() = default;
+
+	Slot(const Slot&) = delete;
+	Slot& operator=(const Slot&) = delete;
+
+	void operator()(ArgsT ... i_args);
+	bool IsBlocked() const noexcept;
+	void SetBlocked(bool i_isBlocked) noexcept;
+
+private:
+	CallbackT m_callback;
+	bool m_isBlocked;
+};
+
+
+} // namespace utils
+
+
+namespace utils
+{
 
 // Signal ////////////////////////////////////////////////////////////////
 
@@ -9,8 +39,6 @@ template<typename ... ArgsT>
 inline utils::Signal<ArgsT...>::Signal()
 	: m_deleteSlotFun(std::make_shared<DeleteSlotFun>(
 		std::bind(&Signal::DeleteSlot, this, std::placeholders::_1)))
-	, m_isSlotConnectedFun(std::make_shared<IsSlotConnectedFun>(
-		std::bind(&Signal::IsSlotConnected, this, std::placeholders::_1)))
 	, m_threadId(std::this_thread::get_id())
 { }
 
@@ -21,7 +49,7 @@ utils::Signal<ArgsT...>::Connect(CallbackT i_callback)
 	assert(m_threadId == std::this_thread::get_id());
 	std::shared_ptr<Slot> slot = std::make_shared<Slot>(i_callback);
 	m_slots.emplace_back(slot);
-	return Connection(slot, m_deleteSlotFun, m_isSlotConnectedFun, m_threadId);
+	return Connection(slot, m_deleteSlotFun, m_threadId);
 }
 
 template<typename ... ArgsT>
@@ -34,7 +62,7 @@ utils::Signal<ArgsT...>::ConnectB(_Fx&& i_fun, _Types&&... i_args)
 		std::bind(std::forward<_Fx>(i_fun), std::forward<_Types>(i_args)...)
 	);
 	m_slots.emplace_back(slot);
-	return Connection(slot, m_deleteSlotFun, m_isSlotConnectedFun, m_threadId);
+	return Connection(slot, m_deleteSlotFun, m_threadId);
 }
 
 template<typename ... ArgsT>
@@ -112,23 +140,21 @@ inline void utils::Signal<ArgsT...>::Slot::SetBlocked(bool i_isBlocked) noexcept
 
 template<typename  ... ArgsT>
 inline utils::Signal<ArgsT...>::Connection::Connection(
-	const std::shared_ptr<Slot>& i_slot, 
+	const std::weak_ptr<Slot>& i_slot, 
 	const std::weak_ptr<DeleteSlotFun>& i_deleteSlotFun,
-	const std::weak_ptr<IsSlotConnectedFun>& i_isSlotConnectedFun,
 	const std::thread::id i_threadId)
-	: m_slot(i_slot), m_deleteSlotFun(i_deleteSlotFun), m_isSlotConnectedFun(i_isSlotConnectedFun), m_threadId(i_threadId)
+	: m_slot(i_slot), m_deleteSlotFun(i_deleteSlotFun), m_threadId(i_threadId)
 { }
 
 template<typename  ... ArgsT>
 inline utils::Signal<ArgsT...>::Connection::Connection()
-	: m_slot(nullptr), m_deleteSlotFun(), m_isSlotConnectedFun(), m_threadId(std::this_thread::get_id())
+	: m_slot(), m_deleteSlotFun(), m_threadId(std::this_thread::get_id())
 { }
 
 template<typename  ... ArgsT>
 inline utils::Signal<ArgsT...>::Connection::Connection(Connection&& rhs)
 	: m_slot(std::move(rhs.m_slot))
 	, m_deleteSlotFun(std::move(rhs.m_deleteSlotFun))
-	, m_isSlotConnectedFun(std::move(rhs.m_isSlotConnectedFun))
 	, m_threadId(rhs.m_threadId)
 { }
 
@@ -139,7 +165,6 @@ inline typename utils::Signal<ArgsT...>::Connection& utils::Signal<ArgsT...>::Co
 	{
 		m_slot = std::move(rhs.m_slot);
 		m_deleteSlotFun = std::move(rhs.m_deleteSlotFun);
-		m_isSlotConnectedFun = std::move(rhs.m_isSlotConnectedFun);
 		m_threadId = rhs.m_threadId;
 	}
 	return *this;
@@ -156,16 +181,20 @@ template<typename ... ArgsT>
 inline bool utils::Signal<ArgsT...>::Connection::IsBlocked() const noexcept
 {
 	assert(m_threadId == std::this_thread::get_id());
-	return m_slot ? m_slot->IsBlocked() : false;
+	if ( std::shared_ptr<Slot> slot = m_slot.lock() )
+	{
+		return slot->IsBlocked();
+	}
+	return false;
 }
 
 template<typename ... ArgsT>
 inline void utils::Signal<ArgsT...>::Connection::SetBlocked(bool i_isBlocked) noexcept
 {
 	assert(m_threadId == std::this_thread::get_id());
-	if ( m_slot )
+	if ( std::shared_ptr<Slot> slot = m_slot.lock() )
 	{
-		m_slot->SetBlocked(i_isBlocked);
+		slot->SetBlocked(i_isBlocked);
 	}
 }
 
@@ -173,13 +202,11 @@ template<typename ... ArgsT>
 inline void utils::Signal<ArgsT...>::Connection::Disconnect()
 {
 	assert(m_threadId == std::this_thread::get_id());
-	if ( m_slot )
+	std::shared_ptr<Slot> slot = m_slot.lock();
+	std::shared_ptr<DeleteSlotFun> slotDeleter = m_deleteSlotFun.lock();
+	if ( slot && slotDeleter )
 	{
-		if ( std::shared_ptr<DeleteSlotFun> slotDeleter = m_deleteSlotFun.lock() )
-		{
-			( *slotDeleter )( m_slot );
-			m_slot = nullptr;
-		}
+		( *slotDeleter )( slot );
 	}
 }
 
@@ -187,14 +214,7 @@ template<typename ... ArgsT>
 inline bool utils::Signal<ArgsT...>::Connection::IsConnected() const
 {
 	assert(m_threadId == std::this_thread::get_id());
-	if ( m_slot )
-	{
-		if ( std::shared_ptr<IsSlotConnectedFun> isSlotConnectedFun = m_isSlotConnectedFun.lock() )
-		{
-			return ( *isSlotConnectedFun )( m_slot );
-		}
-	}
-	return false;
+	return !m_slot.expired();
 }
 
 } //namespace utils
