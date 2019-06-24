@@ -208,5 +208,26 @@ TEST(SignalTest, SignalCheckIsConnected)
 	EXPECT_FALSE(c.IsConnected());
 }
 
+
+TEST(SignalTest, EmptyConnectionCheck)
+{
+	using Sig = utils::Signal<int>;
+	Sig::Connection c;
+	EXPECT_FALSE(c.IsConnected());
+	c.Disconnect();
+	EXPECT_FALSE(c.IsConnected());
+}
+
+TEST(SignalTest, AssignConnectionCheck)
+{
+	using Sig = utils::Signal<int>;
+	Sig::Connection c;
+	EXPECT_FALSE(c.IsConnected());
+	Sig sig;
+	EXPECT_TRUE(c.IsConnected());
+	c.Disconnect();
+	EXPECT_FALSE(c.IsConnected());
+}
+
 } //namespace
 

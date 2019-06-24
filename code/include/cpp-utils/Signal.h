@@ -86,8 +86,9 @@ private:
 		const std::weak_ptr<IsSlotConnectedFun>& i_isSlotConnectedFun,
 		std::thread::id i_threadId);
 public:
-	Connection(Connection&&)					= default;
-	Connection& operator=(Connection&&)			= default;
+	Connection();
+	Connection(Connection&&);
+	Connection& operator=(Connection&&);
 	~Connection();
 
 	Connection(const Connection&)				= delete;		//only 1 connection at the time
@@ -95,14 +96,14 @@ public:
 
 	bool IsBlocked() const noexcept;
 	void SetBlocked(bool i_isBlocked) noexcept;
-	void Disconnect() noexcept;
+	void Disconnect();
 	bool IsConnected() const;
 
 private:
 	std::shared_ptr<Slot> m_slot;
 	std::weak_ptr<DeleteSlotFun> m_deleteSlotFun;
 	std::weak_ptr<IsSlotConnectedFun> m_isSlotConnectedFun;
-	const std::thread::id m_threadId;
+	std::thread::id m_threadId;
 };
 
 } //namespace utils 

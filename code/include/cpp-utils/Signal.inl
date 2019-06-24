@@ -119,6 +119,32 @@ inline utils::Signal<ArgsT...>::Connection::Connection(
 	: m_slot(i_slot), m_deleteSlotFun(i_deleteSlotFun), m_isSlotConnectedFun(i_isSlotConnectedFun), m_threadId(i_threadId)
 { }
 
+template<typename  ... ArgsT>
+inline utils::Signal<ArgsT...>::Connection::Connection()
+	: m_slot(nullptr), m_deleteSlotFun(), m_isSlotConnectedFun(), m_threadId(std::this_thread::get_id())
+{ }
+
+template<typename  ... ArgsT>
+inline utils::Signal<ArgsT...>::Connection::Connection(Connection&& rhs)
+	: m_slot(std::move(rhs.m_slot))
+	, m_deleteSlotFun(std::move(rhs.m_deleteSlotFun))
+	, m_isSlotConnectedFun(std::move(rhs.m_isSlotConnectedFun))
+	, m_threadId(rhs.m_threadId)
+{ }
+
+template<typename  ... ArgsT>
+inline typename utils::Signal<ArgsT...>::Connection& utils::Signal<ArgsT...>::Connection::operator=(Connection&& rhs)
+{
+	if (this != &rhs)
+	{
+		m_slot = std::move(rhs.m_slot);
+		m_deleteSlotFun = std::move(rhs.m_deleteSlotFun);
+		m_isSlotConnectedFun = std::move(rhs.m_isSlotConnectedFun);
+		m_threadId = rhs.m_threadId;
+	}
+	return *this;
+}
+
 template<typename ... ArgsT>
 inline utils::Signal<ArgsT...>::Connection::~Connection()
 {
@@ -130,18 +156,21 @@ template<typename ... ArgsT>
 inline bool utils::Signal<ArgsT...>::Connection::IsBlocked() const noexcept
 {
 	assert(m_threadId == std::this_thread::get_id());
-	return m_slot->IsBlocked();
+	return m_slot ? m_slot->IsBlocked() : false;
 }
 
 template<typename ... ArgsT>
 inline void utils::Signal<ArgsT...>::Connection::SetBlocked(bool i_isBlocked) noexcept
 {
 	assert(m_threadId == std::this_thread::get_id());
-	m_slot->SetBlocked(i_isBlocked);
+	if ( m_slot )
+	{
+		m_slot->SetBlocked(i_isBlocked);
+	}
 }
 
 template<typename ... ArgsT>
-inline void utils::Signal<ArgsT...>::Connection::Disconnect() noexcept
+inline void utils::Signal<ArgsT...>::Connection::Disconnect()
 {
 	assert(m_threadId == std::this_thread::get_id());
 	if ( m_slot )
