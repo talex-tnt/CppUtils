@@ -224,6 +224,7 @@ TEST(SignalTest, AssignConnectionCheck)
 	Sig::Connection c;
 	EXPECT_FALSE(c.IsConnected());
 	Sig sig;
+	c = sig.Connect([] (int delta) { });
 	EXPECT_TRUE(c.IsConnected());
 	c.Disconnect();
 	EXPECT_FALSE(c.IsConnected());
