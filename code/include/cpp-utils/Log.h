@@ -3,7 +3,7 @@
 #ifndef NDEBUG
 #   define DB_MSG(message) \
     do { \
-        std::cout << message << endl;
+        std::cout << message << std::endl; \
     } while (false)
 #else
 #   define DB_MSG(message) do { } while (false)
