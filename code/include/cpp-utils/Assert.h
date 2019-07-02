@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 
 #ifdef __unix__
 // Thanks to https://stackoverflow.com/questions/44140778/resumable-assert-breakpoint-on-ios-like-debugbreak-with-ms-compiler
