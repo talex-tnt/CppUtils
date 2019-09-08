@@ -79,7 +79,7 @@ inline bool operator!=(const Identifier<ValueT>& lhs, const Identifier<ValueT>& 
 
 template<typename ValueT>
 InvalidableIdentifier<ValueT>::InvalidableIdentifier()
-	: Identifier(k_invalidValue)
+	: Identifier<ValueT>(k_invalidValue)
 {
 	// Nothing to do
 }
@@ -93,7 +93,7 @@ InvalidableIdentifier<ValueT>::InvalidableIdentifier(ValueT&& i_value)
 
 template<typename ValueT>
 InvalidableIdentifier<ValueT>::InvalidableIdentifier(const ValueT& i_value)
-	: Identifier(i_value)
+	: Identifier<ValueT>(i_value)
 {
 	// Nothing to do
 }

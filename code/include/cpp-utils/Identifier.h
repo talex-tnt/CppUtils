@@ -1,5 +1,6 @@
 #pragma once
 #include <iosfwd>
+#include <type_traits>
 
 #define DEFINE_IDENTIFIER(IdentifierName, IdentifierType) \
 struct IdentifierName : public utils::Identifier<IdentifierType> \
