@@ -14,10 +14,8 @@ struct IdentifierName : public utils::InvalidableIdentifier<IdentifierType, Iden
 { \
 	using BaseT = utils::InvalidableIdentifier<IdentifierType, IdentifierName>; \
 	using BaseT::BaseT; \
-	static const ValueType k_invalidValue; \
-}; \
-const typename IdentifierName::ValueType \
-IdentifierName::k_invalidValue = InvalidValue; 
+	inline static const ValueType GetInvalidValue() { return InvalidValue; } \
+}; 
 
 namespace utils
 {

@@ -79,7 +79,7 @@ inline bool operator!=(const Identifier<ValueT>& lhs, const Identifier<ValueT>& 
 
 template<typename ValueT, typename Derived>
 InvalidableIdentifier<ValueT, Derived>::InvalidableIdentifier()
-	: Identifier<ValueT>(Derived::k_invalidValue)
+	: Identifier<ValueT>(Derived::GetInvalidValue())
 {
 	// Nothing to do
 }
@@ -101,7 +101,7 @@ InvalidableIdentifier<ValueT, Derived>::InvalidableIdentifier(const ValueT& i_va
 template<typename ValueT, typename Derived>
 inline bool InvalidableIdentifier<ValueT, Derived>::IsValid() const
 {
-	return GetValue() != typename Derived::k_invalidValue;
+	return GetValue() != typename Derived::GetInvalidValue();
 }
 
 template<typename ValueT>
