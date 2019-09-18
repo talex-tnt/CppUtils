@@ -10,14 +10,14 @@ struct IdentifierName : public utils::Identifier<IdentifierType> \
 }; 
 
 #define DEFINE_IDENTIFIER_WITH_INVALID_VALUE(IdentifierName, IdentifierType, InvalidValue) \
-struct IdentifierName : public utils::InvalidableIdentifier<IdentifierType> \
+struct IdentifierName : public utils::InvalidableIdentifier<IdentifierType, IdentifierName> \
 { \
-	using BaseT = utils::InvalidableIdentifier<IdentifierType>; \
+	using BaseT = utils::InvalidableIdentifier<IdentifierType, IdentifierName>; \
 	using BaseT::BaseT; \
+	static const ValueType k_invalidValue; \
 }; \
-template<> \
 const typename IdentifierName::ValueType \
-IdentifierName::BaseT::k_invalidValue = InvalidValue; 
+IdentifierName::k_invalidValue = InvalidValue; 
 
 namespace utils
 {
@@ -78,7 +78,7 @@ private:
 };
 
 
-template<typename ValueT>
+template<typename ValueT, typename Derived>
 class InvalidableIdentifier : public Identifier<ValueT>
 {
 public:
@@ -87,7 +87,6 @@ public:
 	explicit InvalidableIdentifier(ValueT&& i_value);
 	explicit InvalidableIdentifier(const ValueT& i_value);
 	bool IsValid() const;
-	static const ValueT k_invalidValue;
 };
 
 } //namespace utils

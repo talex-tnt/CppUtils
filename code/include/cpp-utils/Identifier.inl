@@ -32,7 +32,7 @@ Identifier<ValueT>::Identifier(Identifier<ValueT>&& rhs)
 }
 
 template<typename ValueT>
-Identifier<ValueT>& Identifier<ValueT>::operator=(const Identifier<ValueT>& rhs) &
+inline Identifier<ValueT>& Identifier<ValueT>::operator=(const Identifier<ValueT>& rhs) &
 {
 	if ( this != &rhs )
 	{
@@ -42,7 +42,7 @@ Identifier<ValueT>& Identifier<ValueT>::operator=(const Identifier<ValueT>& rhs)
 }
 
 template<typename ValueT>
-Identifier<ValueT>& Identifier<ValueT>::operator=(Identifier<ValueT>&& rhs) &
+inline Identifier<ValueT>& Identifier<ValueT>::operator=(Identifier<ValueT>&& rhs) &
 {
 	if ( this != &rhs )
 	{
@@ -52,13 +52,13 @@ Identifier<ValueT>& Identifier<ValueT>::operator=(Identifier<ValueT>&& rhs) &
 }
 
 template<typename ValueT>
-const ValueT& Identifier<ValueT>::GetValue() const&
+inline const ValueT& Identifier<ValueT>::GetValue() const&
 {
 	return m_value;
 }
 
 template<typename ValueT>
-ValueT Identifier<ValueT>::GetValue() const&&
+inline ValueT Identifier<ValueT>::GetValue() const&&
 {
 	return std::move(m_value);
 }
@@ -77,31 +77,31 @@ inline bool operator!=(const Identifier<ValueT>& lhs, const Identifier<ValueT>& 
 	return !( lhs == rhs );
 }
 
-template<typename ValueT>
-InvalidableIdentifier<ValueT>::InvalidableIdentifier()
-	: Identifier<ValueT>(k_invalidValue)
+template<typename ValueT, typename Derived>
+InvalidableIdentifier<ValueT, Derived>::InvalidableIdentifier()
+	: Identifier<ValueT>(Derived::k_invalidValue)
 {
 	// Nothing to do
 }
 
-template<typename ValueT>
-InvalidableIdentifier<ValueT>::InvalidableIdentifier(ValueT&& i_value)
+template<typename ValueT, typename Derived>
+InvalidableIdentifier<ValueT, Derived>::InvalidableIdentifier(ValueT&& i_value)
 	: Identifier(std::move(i_value))
 {
 	// Nothing to do
 }
 
-template<typename ValueT>
-InvalidableIdentifier<ValueT>::InvalidableIdentifier(const ValueT& i_value)
+template<typename ValueT, typename Derived>
+InvalidableIdentifier<ValueT, Derived>::InvalidableIdentifier(const ValueT& i_value)
 	: Identifier<ValueT>(i_value)
 {
 	// Nothing to do
 }
 
-template<typename ValueT>
-bool InvalidableIdentifier<ValueT>::IsValid() const
+template<typename ValueT, typename Derived>
+inline bool InvalidableIdentifier<ValueT, Derived>::IsValid() const
 {
-	return GetValue() != k_invalidValue;
+	return GetValue() != typename Derived::k_invalidValue;
 }
 
 template<typename ValueT>
@@ -120,14 +120,14 @@ inline std::istream& operator>>(std::istream& i_stream, Identifier<ValueT>& i_id
 
 
 template<typename ValueT>
-bool utils::Identifier<ValueT>::LessCmp::operator()(const Identifier<ValueT>& lhs, const Identifier<ValueT>& rhs) const
+inline bool utils::Identifier<ValueT>::LessCmp::operator()(const Identifier<ValueT>& lhs, const Identifier<ValueT>& rhs) const
 {
 	return lhs.GetValue() < rhs.GetValue();
 }
 
 
 template<typename ValueT>
-std::size_t utils::Identifier<ValueT>::Hasher::operator()(const Identifier<ValueT>& rhs) const
+inline std::size_t utils::Identifier<ValueT>::Hasher::operator()(const Identifier<ValueT>& rhs) const
 {
 	return std::hash<ValueT>{}(rhs.GetValue());
 }
