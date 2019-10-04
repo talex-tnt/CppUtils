@@ -26,8 +26,8 @@ public:
 	using CallbackT = std::function<void(ArgsT...)>;
 	Connection Connect(CallbackT i_callback);
 	
-	template<typename _Fx, typename ... _Types>
-	Connection ConnectB(_Fx&& i_fun, _Types&&... i_args); // std::bind(i_fun, i_args)
+	template<typename _Fx, typename _Type1, typename ... _Types>
+	Connection Connect(_Fx&& i_fun, _Type1&& i_arg1, _Types&&... i_args); // std::bind(i_fun, i_args)
 
 	void Emit(ArgsT... i_args);
 	std::size_t GetSlotCount() const noexcept;

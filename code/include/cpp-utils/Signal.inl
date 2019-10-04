@@ -61,13 +61,13 @@ inline utils::Connection utils::Signal<ArgsT...>::Connect(CallbackT i_callback)
 }
 
 template<typename ... ArgsT>
-template<typename _Fx, typename ... _Types>
-inline utils::Connection utils::Signal<ArgsT...>::ConnectB(_Fx&& i_fun, _Types&&... i_args)
+template<typename _Fx, typename _Type1, typename ... _Types>
+inline utils::Connection utils::Signal<ArgsT...>::Connect(_Fx&& i_fun, _Type1&& i_arg1, _Types&&... i_args)
 {
 	DB_ASSERT_MSG(m_threadId == std::this_thread::get_id(), "Thread Id Mismatch");
 	
 	m_slots.emplace_back(std::make_shared<Slot>(
-		std::bind(std::forward<_Fx>(i_fun), std::forward<_Types>(i_args)...)
+		std::bind(std::forward<_Fx>(i_fun), std::forward<_Type1>(i_arg1), std::forward<_Types>(i_args)...)
 	));
 	return Connection(m_slots.back(), m_deleteSlotFun, m_threadId);
 }

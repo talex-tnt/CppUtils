@@ -76,7 +76,7 @@ TEST(SignalTest, SignalConnectedWithMethod)
 	Delegate<T> del(original);
 
 	Sig sig;
-	Sig::Connection c = sig.ConnectB(&Delegate<T>::SetValue, &del, std::placeholders::_1);
+	Sig::Connection c = sig.Connect(&Delegate<T>::SetValue, &del, std::placeholders::_1);
 
 	sig.Emit(expected);
 
@@ -94,7 +94,7 @@ TEST(SignalTest, SignalDisconnectedWithMethod)
 
 	Sig sig;
 	{
-		Sig::Connection c = sig.ConnectB(&Delegate<T>::SetValue, &del, std::placeholders::_1);
+		Sig::Connection c = sig.Connect(&Delegate<T>::SetValue, &del, std::placeholders::_1);
 	}
 
 	sig.Emit(expected);
@@ -136,7 +136,7 @@ TEST(SignalTest, SignalConnectedWithFuncSum2Placeholders)
 
 	Sig sig;
 
-	Sig::Connection c = sig.ConnectB(&Sum, original1, original2, std::placeholders::_1);
+	Sig::Connection c = sig.Connect(&Sum, original1, original2, std::placeholders::_1);
 
 	sig.Emit(result);
 
