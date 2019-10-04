@@ -9,18 +9,20 @@ class ISlot;
 class Connection;
 
 template<typename ... ArgsT>
-class Signal
+class SignalBase
 {
 public:
-	Signal();
-	Signal(Signal&&)					= default;
-	Signal& operator=(Signal&&)			= default;
-	~Signal()							= default;
+	SignalBase();
+	SignalBase(SignalBase&&)					= default;
+	SignalBase& operator=(SignalBase&&)			= default;
 
-	Signal(const Signal&)				= delete;
-	Signal& operator=(const Signal&)	= delete;
+	SignalBase(const SignalBase&)				= delete;
+	SignalBase& operator=(const SignalBase&)	= delete;
 
 	using Connection = Connection;
+
+protected:
+	~SignalBase()							= default;
 
 public:
 	using CallbackT = std::function<void(ArgsT...)>;
@@ -29,8 +31,11 @@ public:
 	template<typename _Fx, typename _Type1, typename ... _Types>
 	Connection Connect(_Fx&& i_fun, _Type1&& i_arg1, _Types&&... i_args); // std::bind(i_fun, i_args)
 
-	void Emit(ArgsT... i_args);
 	std::size_t GetSlotCount() const noexcept;
+
+protected:
+	template<typename ... Args>
+	void Emit(Args&&... i_args);
 
 private:
 	using ISlotPtr = std::shared_ptr<ISlot>;
@@ -49,6 +54,30 @@ private:
 
 	const std::thread::id m_threadId;
 };
+
+template<typename ... ArgsT>
+class Signal : public SignalBase<ArgsT...>
+{
+public:
+	using SignalBase::Emit;
+};
+
+
+template<typename Key, typename ... ArgsT>
+class PrvSignal : public SignalBase<ArgsT...>
+{
+public:
+	class Access
+	{
+	public:
+		Access(PrvSignal& i_sig) :m_sig(i_sig) { }
+		template<typename ... Args>
+		void Emit(Args&&... i_args) && { m_sig.Emit(std::forward<Args>(i_args)...); }
+	private:
+		PrvSignal& m_sig;
+	};
+};
+
 
 //////////////////////////////////////////////////////////////////////////
 //							Connection

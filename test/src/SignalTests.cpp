@@ -19,6 +19,20 @@ private:
 	T m_value;
 };
 
+class Emitter
+{
+public:
+	void Emit(int v) 
+	{
+		Sig::Access(sig_emit).Emit(v);
+	}
+protected:
+	class SigKey;
+public:
+	using Sig = utils::PrvSignal<SigKey, int>;
+	Sig sig_emit;
+};
+
 TEST(SignalTest, SignalConnectedWithLambda)
 {
 	using Sig = utils::Signal<int>;
@@ -262,6 +276,34 @@ TEST(SignalTest, SignalCheckMultipleConnections)
 		}
 		EXPECT_TRUE(c1.IsConnected());
 	}
+}
+
+TEST(PrvSignalTest, SignalConnectedWithLambda)
+{
+	class KeyT;
+	using Sig = utils::PrvSignal<KeyT, int>;
+	const int original = 0;
+	int value = original;
+	Sig sig;
+	Sig::Connection c = sig.Connect([ &value ] (int delta) { value += delta; });
+
+	const int delta = 100;
+	Sig::Access(sig).Emit(delta);
+
+	EXPECT_EQ(value, original + delta);
+}
+
+TEST(PrvSignalTest, EmitterWithLambda)
+{
+	Emitter emitter;
+	const int original = 0;
+	int value = original;
+	Emitter::Sig::Connection c = emitter.sig_emit.Connect([ &value ] (int delta) { value += delta; });
+	//emitter.sig_emit.Emit(100); // not allowed
+	const int delta = 100;
+	emitter.Emit(delta);
+
+	EXPECT_EQ(value, original + delta);
 }
 } //namespace
 
