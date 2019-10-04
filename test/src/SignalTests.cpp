@@ -24,12 +24,12 @@ class Emitter
 public:
 	void Emit(int v) 
 	{
-		Sig::Access(sig_emit).Emit(v);
+		Sig::Emitter(sig_emit).Emit(v);
 	}
 protected:
 	class SigKey;
 public:
-	using Sig = utils::PrvSignal<SigKey, int>;
+	using Sig = utils::KeySignal<SigKey, int>;
 	Sig sig_emit;
 };
 
@@ -281,14 +281,14 @@ TEST(SignalTest, SignalCheckMultipleConnections)
 TEST(PrvSignalTest, SignalConnectedWithLambda)
 {
 	class KeyT;
-	using Sig = utils::PrvSignal<KeyT, int>;
+	using Sig = utils::KeySignal<KeyT, int>;
 	const int original = 0;
 	int value = original;
 	Sig sig;
 	Sig::Connection c = sig.Connect([ &value ] (int delta) { value += delta; });
 
 	const int delta = 100;
-	Sig::Access(sig).Emit(delta);
+	Sig::Emitter(sig).Emit(delta);
 
 	EXPECT_EQ(value, original + delta);
 }

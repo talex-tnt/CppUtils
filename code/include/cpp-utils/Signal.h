@@ -64,17 +64,17 @@ public:
 
 
 template<typename Key, typename ... ArgsT>
-class PrvSignal : public SignalBase<ArgsT...>
+class KeySignal : public SignalBase<ArgsT...>
 {
 public:
-	class Access
+	class Emitter
 	{
 	public:
-		Access(PrvSignal& i_sig) :m_sig(i_sig) { }
+		Emitter(KeySignal& i_sig) :m_sig(i_sig) { }
 		template<typename ... Args>
 		void Emit(Args&&... i_args) && { m_sig.Emit(std::forward<Args>(i_args)...); }
 	private:
-		PrvSignal& m_sig;
+		KeySignal& m_sig;
 	};
 };
 
