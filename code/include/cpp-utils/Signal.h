@@ -3,6 +3,8 @@
 #include <vector>
 #include <thread>
 
+namespace cpp
+{
 namespace utils
 {
 class ISlot;
@@ -116,5 +118,6 @@ private:
 };
 
 } //namespace utils 
+} //namespace cpp 
 
 #include "Signal.inl"

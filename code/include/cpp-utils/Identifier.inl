@@ -1,6 +1,8 @@
 #pragma once
 #include <type_traits>
 
+namespace cpp
+{
 namespace utils
 {
 template<typename ValueT>
@@ -129,7 +131,8 @@ inline bool utils::Identifier<ValueT>::LessCmp::operator()(const Identifier<Valu
 template<typename ValueT>
 inline std::size_t utils::Identifier<ValueT>::Hasher::operator()(const Identifier<ValueT>& rhs) const
 {
-	return std::hash<ValueT>{}(rhs.GetValue());
+	return std::hash<ValueT>{}( rhs.GetValue() );
 }
 
-} //namespace utils
+} //namespace utils 
+} //namespace cpp

@@ -4,6 +4,7 @@
 
 namespace
 {
+using namespace cpp;
 
 void Square(int& value) { value *= value; }
 void Sum(int a, int b, int& result) { result = a + b; }

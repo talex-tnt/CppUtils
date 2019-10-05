@@ -3,20 +3,22 @@
 #include <type_traits>
 
 #define DEFINE_IDENTIFIER(IdentifierName, IdentifierType) \
-struct IdentifierName : public utils::Identifier<IdentifierType> \
+struct IdentifierName : public cpp::utils::Identifier<IdentifierType> \
 { \
-	using BaseT = utils::Identifier<IdentifierType>; \
+	using BaseT = cpp::utils::Identifier<IdentifierType>; \
 	using BaseT::BaseT; \
 }; 
 
 #define DEFINE_IDENTIFIER_WITH_INVALID_VALUE(IdentifierName, IdentifierType, InvalidValue) \
-struct IdentifierName : public utils::InvalidableIdentifier<IdentifierType, IdentifierName> \
+struct IdentifierName : public cpp::utils::InvalidableIdentifier<IdentifierType, IdentifierName> \
 { \
-	using BaseT = utils::InvalidableIdentifier<IdentifierType, IdentifierName>; \
+	using BaseT = cpp::utils::InvalidableIdentifier<IdentifierType, IdentifierName>; \
 	using BaseT::BaseT; \
 	inline static const ValueType GetInvalidValue() { return InvalidValue; } \
 }; 
 
+namespace cpp
+{
 namespace utils
 {
 
@@ -87,6 +89,6 @@ public:
 	bool IsValid() const;
 };
 
-} //namespace utils
-
+} // namespace utils
+} // namespace cpp
 #include "Identifier.inl"

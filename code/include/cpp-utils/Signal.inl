@@ -1,6 +1,8 @@
 #pragma once
 #include "Assert.h"
 
+namespace cpp
+{
 namespace utils
 {
 //////////////////////////////////////////////////////////////////////////
@@ -217,3 +219,4 @@ inline bool utils::Connection::IsConnected() const
 }
 
 } //namespace utils
+} //namespace cpp
