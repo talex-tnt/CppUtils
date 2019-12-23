@@ -93,8 +93,8 @@ void utils::SignalBase<ArgsT...>::DeleteSlot(const ISlotPtr& i_slot)
 {
 	DB_ASSERT_MSG(m_threadId == std::this_thread::get_id(), "Thread Id Mismatch");
 
-	SlotsCollection::const_iterator end = m_slots.cend();
-	SlotsCollection::const_iterator it = std::find(m_slots.cbegin(), end, i_slot);
+	typename SlotsCollection::const_iterator end = m_slots.cend();
+	typename SlotsCollection::const_iterator it = std::find(m_slots.cbegin(), end, i_slot);
 	DB_ASSERT_MSG(it != end, "Slot Not Found!");
 	if ( it != end )
 	{
@@ -106,8 +106,8 @@ template<typename ... ArgsT>
 bool utils::SignalBase<ArgsT...>::IsSlotConnected(const ISlotPtr& i_slot) const
 {
 	DB_ASSERT_MSG(m_threadId == std::this_thread::get_id(), "Thread Id Mismatch");
-	SlotsCollection::const_iterator end = m_slots.cend();
-	SlotsCollection::const_iterator it = std::find(m_slots.cbegin(), end, i_slot);
+	typename SlotsCollection::const_iterator end = m_slots.cend();
+	typename SlotsCollection::const_iterator it = std::find(m_slots.cbegin(), end, i_slot);
 	return ( it != end );
 }
 

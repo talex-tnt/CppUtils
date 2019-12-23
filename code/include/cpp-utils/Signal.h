@@ -61,7 +61,7 @@ template<typename ... ArgsT>
 class Signal : public SignalBase<ArgsT...>
 {
 public:
-	using SignalBase::Emit;
+	using SignalBase<ArgsT...>::Emit;
 };
 
 
