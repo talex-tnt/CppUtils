@@ -25,7 +25,11 @@
     :   "r0", "r1", "r12", "memory")
 #elif defined(__APPLE__) && (defined(__i386__) || defined(__x86_64__))
 #define __debugbreak() __asm__ __volatile__("int $3; mov %eax, %eax")
+#else
+#define __debugbreak()
 #endif
+#else
+#define __debugbreak()
 #endif
 
 #define DEBUG_BREAK(expr) do { if (!(expr)){ __debugbreak(); } } while(0)
